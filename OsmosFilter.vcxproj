@@ -45,10 +45,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|VisualGDB'">
     <ClCompile>
       <AdditionalIncludeDirectories>E:\Projects\AVR\libs\Mcucpp\3rdparty\include;E:\Projects\AVR\libs\Mcucpp\mcucpp;E:\Projects\AVR\libs\Mcucpp\mcucpp\AVR;E:\Projects\AVR\libs\MyCustomLibs;%(ClCompile.AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG=1;RELEASE=1 -std=c++17 -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections -fpack-struct -fshort-enums;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalCPPOptions>-std=c++17</AdditionalCPPOptions>
-      <CPPLanguageStandard>CPP1Z</CPPLanguageStandard>
-      <Optimization>Os</Optimization>
+      <PreprocessorDefinitions>NDEBUG=1;RELEASE=1 -std=c++2a -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections -fpack-struct -fshort-enums;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Optimization>O3</Optimization>
       <LinkTimeOptimization>true</LinkTimeOptimization>
       <InlineFunctions>true</InlineFunctions>
       <GenerateAssemblyOutput>true</GenerateAssemblyOutput>

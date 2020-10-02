@@ -32,6 +32,17 @@
     <PreBuildActions />
     <PostBuildActions>
       <CustomActionBase xsi:type="CommandLineAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <RemoteHost>
+          <HostName>BuildMachine</HostName>
+          <Transport>BuiltinShortcut</Transport>
+        </RemoteHost>
+        <Command>"C:\Program Files (x86)\AtmelStudio\7.0\toolchain\avr8\win64\bin\avr-strip.exe"</Command>
+        <Arguments>--strip-debug $(TargetFileName)</Arguments>
+        <WorkingDirectory>$(TargetDir)</WorkingDirectory>
+        <BackgroundMode>false</BackgroundMode>
+      </CustomActionBase>
+      <CustomActionBase xsi:type="CommandLineAction">
         <SkipWhenRunningCommandList>true</SkipWhenRunningCommandList>
         <Command>C:\Program Files (x86)\AtmelStudio\7.0\toolchain\avr8\win64\bin\avr-objdump.exe</Command>
         <Arguments>-h -S $(TargetFileName) &gt; $(TargetFileNameWithoutExtension).lss</Arguments>
