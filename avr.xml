@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <EmbeddedProfile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <ToolchainID>ed3fdd6f-926c-4b50-89c5-18356e501699</ToolchainID>
+  <ToolchainID>d63903af-7af9-4be7-ad99-d371ba7d7b7a</ToolchainID>
   <ToolchainVersion>
-    <GCC>9.1.1</GCC>
-    <GDB>8.2.50.20190202-git</GDB>
+    <GCC>11.1.0</GCC>
+    <GDB>10.2</GDB>
     <Revision>0</Revision>
   </ToolchainVersion>
   <BspID>com.sysprogs.avr.core</BspID>

@@ -338,3 +338,6 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/.visualgdb/CodeDB/OsmosFilter-Release-VisualGDB
+/LiveDataPresureSensor
+/VisualGDB/VisualGDBCache/OsmosFilter-Release/MemoryUtilizationReport.xml
