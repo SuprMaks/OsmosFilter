@@ -340,4 +340,4 @@ ASALocalRun/
 healthchecksdb
 /.visualgdb/CodeDB/OsmosFilter-Release-VisualGDB
 /LiveDataPresureSensor
-/VisualGDB/VisualGDBCache/OsmosFilter-Release/MemoryUtilizationReport.xml
+/VisualGDB/VisualGDBCache
