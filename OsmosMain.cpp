@@ -58,7 +58,7 @@ namespace delay {
 			}
 
 			namespace valve {
-				constexpr auto on = sec_conv(1);
+				constexpr auto on = 0;
 				constexpr auto off = sec_conv(2);
 			}
 
@@ -73,20 +73,22 @@ namespace delay {
 				constexpr auto try_water_max = try_water * (0b1 << 6);
 			}
 		}
-		constexpr auto PRE_WASH = sec_conv(5);
-		constexpr auto FAST_WASH = sec_conv(20);
-		constexpr auto WASH = sec_conv(50);
-		constexpr auto POST_WASH = sec_conv(5);
+		constexpr auto WASH_BASE = 20u;
 
-		constexpr auto PRE_FILLING = sec_conv(5);
-		constexpr auto POST_FILLING = sec_conv(5);
+		constexpr auto PRE_WASH = sec_conv(4);
+		constexpr auto FAST_WASH = sec_conv(WASH_BASE);
+		constexpr auto WASH = sec_conv(WASH_BASE * 2);
+		constexpr auto AUTO_WASH_LIMIT = sec_conv(WASH_BASE * 2 * 5);
+		constexpr auto POST_WASH = sec_conv(4);
 
-		//constexpr auto BETWEEN_FILLING = sec_conv(60);
+		constexpr auto PRE_FILLING = sec_conv(4);
+		constexpr auto FINISHING = sec_conv(4);
+
 		constexpr auto MAX_PUMPING = sec_conv(3 * 60 * 60);
 
-		constexpr auto POST_FILL_WASH = sec_conv(15);
+		constexpr auto POST_FILL_WASH = sec_conv(WASH_BASE / 2.5);
 
-		constexpr auto WASH_TIMER = sec_conv(60 * 60);
+		constexpr auto FAST_WASH_PERIOD = sec_conv(60 * 60);
 		constexpr auto AUTO_WASH_PERIOD = sec_conv(6 * 60 * 60);
 
 		constexpr auto BTN_TIMER = sec_conv(2);
@@ -94,18 +96,13 @@ namespace delay {
 	#endif // DEBUG
 }
 
-namespace pins {
+namespace pin {
 	using namespace Mcucpp::IO;
 
 	using HighSensor = Pd0;
 	using WaterLack = Pd1;
 	using ValveOpened = Pd2;
 	using LowSensor = Pd3;
-
-	/*using LowSensor = Pd0;
-	using HighSensor = Pd1;
-	using ValveOpened = Pd2;
-	using WaterLack = Pd3;*/
 
 	using Pump = Pd4;
 	using Valve = Pb5;
@@ -114,7 +111,7 @@ namespace pins {
 	using Btn = Pb0;
 }
 
-namespace regs {
+namespace reg {
 	using eimsk = IOReg<0x1D + __SFR_OFFSET>;
 	using eifr = IOReg<0x1C + __SFR_OFFSET>;
 	using wdtcsr = IOReg<0x60>;
@@ -122,63 +119,63 @@ namespace regs {
 	using pcifr = IOReg<0x1B + __SFR_OFFSET>;
 }
 
-namespace flags {
+namespace flag {
 	namespace wdtcsr {
-		using wdif = Flag<regs::wdtcsr, WDIF>;
+		using wdif = Flag<reg::wdtcsr, WDIF>;
 	}
 
 	namespace eifr {
-		using intf0 = Flag<regs::eifr, INTF0>;
-		using intf1 = Flag<regs::eifr, INTF1>;
-		using intf2 = Flag<regs::eifr, INTF2>;
-		using intf3 = Flag<regs::eifr, INTF3>;
+		using intf0 = Flag<reg::eifr, INTF0>;
+		using intf1 = Flag<reg::eifr, INTF1>;
+		using intf2 = Flag<reg::eifr, INTF2>;
+		using intf3 = Flag<reg::eifr, INTF3>;
 	}
 
 	namespace eimsk {
-		using int0 = Flag<regs::eimsk, INT0>;
-		using int1 = Flag<regs::eimsk, INT1>;
-		using int2 = Flag<regs::eimsk, INT2>;
-		using int3 = Flag<regs::eimsk, INT3>;
+		using int0 = Flag<reg::eimsk, INT0>;
+		using int1 = Flag<reg::eimsk, INT1>;
+		using int2 = Flag<reg::eimsk, INT2>;
+		using int3 = Flag<reg::eimsk, INT3>;
 	}
 
 	namespace pcmsk0 {
-		using pcint0 = Flag<regs::pcmsk0, PCINT0>;
+		using pcint0 = Flag<reg::pcmsk0, PCINT0>;
 	}
 
 	namespace pcifr {
-		using pcif0 = Flag<regs::pcifr, PCIF0>;
+		using pcif0 = Flag<reg::pcifr, PCIF0>;
 	}
 }
 
-namespace sensors {
-	namespace regs {
+namespace sensor {
+	namespace reg {
 		namespace low {
-			using eimsk = flags::eimsk::int0;
-			using eifr = flags::eifr::intf0;
-			//using wdtcsr = flags::wdtcsr::wdif;
+			using eimsk = flag::eimsk::int0;
+			using eifr = flag::eifr::intf0;
+			//using wdtcsr = flag::wdtcsr::wdif;
 		}
 
 		namespace high {
-			using eimsk = flags::eimsk::int1;
-			using eifr = flags::eifr::intf1;
-			//using wdtcsr = flags::wdtcsr::wdif;
+			using eimsk = flag::eimsk::int1;
+			using eifr = flag::eifr::intf1;
+			//using wdtcsr = flag::wdtcsr::wdif;
 		}
 
 		namespace valve {
-			using eimsk = flags::eimsk::int2;
-			using eifr = flags::eifr::intf2;
-			//using wdtcsr = flags::wdtcsr::wdif;
+			using eimsk = flag::eimsk::int2;
+			using eifr = flag::eifr::intf2;
+			//using wdtcsr = flag::wdtcsr::wdif;
 		}
 
 		namespace lack {
-			using eimsk = flags::eimsk::int3;
-			using eifr = flags::eifr::intf3;
-			//using wdtcsr = flags::wdtcsr::wdif;
+			using eimsk = flag::eimsk::int3;
+			using eifr = flag::eifr::intf3;
+			//using wdtcsr = flag::wdtcsr::wdif;
 		}
 	}
 	
 	namespace classes {
-		using namespace pins;
+		using namespace pin;
 
 		using High = Sensor<HighSensor, unsigned char, delay::threshold::high::on, delay::threshold::high::off>;
 		using Low = Sensor<LowSensor, unsigned char, delay::threshold::low::on, delay::threshold::low::off>;
@@ -192,7 +189,7 @@ namespace sensors {
 					private:
 						friend Valve;
 
-						MedianFilteredValue <unsigned short int, 10> current;
+						MedianFilteredValue <unsigned short int, 16> current;
 						unsigned short int staging;
 
 						unsigned short int inline get_staging(void) {
@@ -218,25 +215,6 @@ namespace sensors {
 						unsigned short int inline __attribute__((always_inline)) operator()(void) {
 							return current();
 						}
-
-						/*operator bool(void) {
-							unsigned short int tmp = operator()();
-							if (tmp > 0) {
-								return tmp <= atomic_read(staging);
-							}
-							return false;
-						}*/
-
-						//void new_iteration(void) {
-						//	volatile unsigned short int tmp = get_staging();
-						//	//ATOMIC {
-						//		/*tmp = staging;
-						//		staging = 0;*/
-						//	/*}
-						//	bitSet(WDTCSR, WDIE);*/
-						//	memory();
-						//	current(tmp);
-						//}
 				} stats;
 
 			private:
@@ -270,9 +248,9 @@ namespace sensors {
 				}
 		};
 
-		class WaterLack : public Sensor<pins::WaterLack, unsigned int, delay::threshold::lack::on, delay::threshold::lack::off> {
+		class WaterLack : public Sensor<pin::WaterLack, unsigned int, delay::threshold::lack::on, delay::threshold::lack::off> {
 			protected:
-				typedef Sensor<pins::WaterLack, unsigned int, delay::threshold::lack::on, delay::threshold::lack::off> base;
+				typedef Sensor<pin::WaterLack, unsigned int, delay::threshold::lack::on, delay::threshold::lack::off> base;
 				friend ISRf(INT3_vect);
 
 				enum class WaterLackMode : const unsigned char {
@@ -285,21 +263,11 @@ namespace sensors {
 
 				WaterLackMode mode;
 
-				const unsigned int get_timer_delay(const bool state) const override {
-					/*switch (mode) {
-						case WaterLackMode::Normal:
-						case WaterLackMode::Lost:
-							return base::get_timer_delay(state);
-							break;
-						case WaterLackMode::Waiting:
-							return delay::threshold::lack::waiting_water;
-							break;
-					}*/
+				unsigned int get_timer_delay(const bool state) override {
 					if (mode == WaterLackMode::Waiting) {
 						return delay::threshold::lack::waiting_water;
 					}
 					return base::get_timer_delay(state);
-					//return !this->normal_mode & state ? delay::threshold::lack::waiting_water : base::get_timer_delay(state);
 				}
 
 				void inline __attribute__((always_inline)) handler_timer_done(void) override {
@@ -311,40 +279,13 @@ namespace sensors {
 							mode = WaterLackMode::Lost;
 							this->time = delay::threshold::lack::without_water;
 							memory();
-							//this->time_sync = false;
 						}
 						base::handler_timer_done();
 					}
 					else if(!value() && mode == WaterLackMode::Lost) {
-						/*unsigned int tmp = base::get_timer_delay(value());
-						if (tmp > lost_timer) {
-							lost_timer = 0;
-						}
-						else {
-							lost_timer -= tmp;
-						}
-
-						if (lost_timer == 0) {*/
-							mode = WaterLackMode::Waiting;
-						//}
+						mode = WaterLackMode::Waiting;
 					}
 				}
-
-				/*void handler_timer_done(void) override {
-					if (this->stage_val != this->value()) {
-						base::handler_timer_done();
-						memory();
-						this->normal_mode = true;
-						memory();
-						if (!this->value()) {
-							this->timer(delay::threshold::lack::without_water);
-						}
-
-					}
-					else if (!this->value()) {
-						this->normal_mode = false;
-					}
-				}*/
 
 			public:
 				WaterLack(void) : base(), mode(real_val() ? WaterLackMode::Normal : WaterLackMode::Lost) {};
@@ -358,17 +299,17 @@ namespace sensors {
 	classes::WaterLack WaterLack;
 }
 
-namespace buttons {
-	namespace regs {
+namespace button {
+	namespace reg {
 		namespace btn {
-			using msk = flags::pcmsk0::pcint0;
-			using flg = flags::pcifr::pcif0;
-			//using timer_flg = flags::wdtcsr::wdif;
+			using msk = flag::pcmsk0::pcint0;
+			using flg = flag::pcifr::pcif0;
+			//using timer_flg = flag::wdtcsr::wdif;
 		}
 	}
 
 	namespace classes {
-		using Btn = ButtonAssync<pins::Btn, unsigned char, regs::btn::msk, regs::btn::flg>;
+		using Btn = ButtonAssync<pin::Btn, unsigned char, reg::btn::msk, reg::btn::flg>;
 	}
 
 	classes::Btn Btn;
@@ -394,7 +335,7 @@ class Pump : public Timer<unsigned short int> {
 		#endif
 		friend int main();
 
-		MedianFilteredValue <TimerDT, 10> stat;
+		MedianFilteredValue <TimerDT, 8> stat;
 
 		TimerDT _incr_delay;
 
@@ -433,12 +374,9 @@ class Pump : public Timer<unsigned short int> {
 		}
 
 		TimerDT pump_time(void) {
-			TimerDT tmp;
-			if (stat() == 0) {
-				tmp = delay::MAX_PUMPING;
-			}
-			else {
-				tmp = (TimerDT) simple_round((double)stat() * 1.2);
+			TimerDT tmp = delay::MAX_PUMPING;
+			if (stat() != 0) {
+				tmp = (TimerDT)simple_round((double)stat() * 1.3);
 				if (tmp > delay::MAX_PUMPING) {
 					tmp = delay::MAX_PUMPING;
 				}
@@ -475,21 +413,19 @@ class Pump : public Timer<unsigned short int> {
 		}
 
 		void inline __attribute__((always_inline)) state(State st) {
-			//atomic_wrapper_in();
 			memory();
 			_state = st;
 			memory();
-			//atomic_wrapper_out();
 		}
 
 		Pump(void) : base(), _state(State::Ready), _incr_delay(delay::threshold::lack::try_water), atomic_time(true), atomic(true) {
-			pins::Pump::SetConfiguration(pins::Pump::Port::Out);
-			pins::Pump::Clear();
+			pin::Pump::SetConfiguration(pin::Pump::Port::Out);
+			pin::Pump::Clear();
 		}
 
 		void on(void) {
-			if (!pins::Pump::IsSet()) {
-				pins::Pump::Set();
+			if (!pin::Pump::IsSet()) {
+				pin::Pump::Set();
 				memory();
 				state(State::Working);
 				memory();
@@ -498,21 +434,11 @@ class Pump : public Timer<unsigned short int> {
 		};
 
 		void off(void) {
-			if (pins::Pump::IsSet()) {
-				pins::Pump::Clear();
+			if (pin::Pump::IsSet()) {
+				pin::Pump::Clear();
 				memory();
 				state(State::Cooldown);
 				memory();
-
-				/*if (elapsed_time() < sec_conv(30)) {
-					
-				}
-				else if (elapsed_time() > incremental_delay) {
-					if (incremental_delay > delay::threshold::lack::try_water) {
-						incremental_delay /= 2;
-					}
-				}
-				this->timer(incremental_delay);*/
 
 				if (atomic) {
 					TimerDT sum = 0;
@@ -532,9 +458,6 @@ class Pump : public Timer<unsigned short int> {
 						}
 					}
 				}
-				//atomic = atomic_time;
-
-				//this->timer((elapsed_time() < delay::threshold::lack::off + sec_conv(8)) ? delay::threshold::lack::try_water : delay::BETWEEN_FILLING);
 			}
 		}
 } pump;
@@ -550,7 +473,9 @@ class Tank {
 
 		static State state(void) {
 			static State buffer;
-			State state = static_cast <State>((unsigned char)(((sensors::High.value() ? 0x01 : 0x00) << 1) | (sensors::Low.value() ? 0x01 : 0x00)));
+			const State state = static_cast <State>((unsigned char)(((sensor::High.value() ? 0x01u : 0x00u) << 1) | (sensor::Low.value() ? 0x01u : 0x00u)));
+
+			memory();
 
 			if (state == State::Impossible) {
 				exit(EXIT_SUCCESS);
@@ -558,35 +483,38 @@ class Tank {
 			else if (state == State::Full) {
 				buffer = state;
 			}
-			else if (!sensors::Valve.value()) {
+			else if (!sensor::Valve.value()) {
 				buffer = state;
 			}
-			else if (state == State::Empty && sensors::Valve) {
+			else if (state == State::Empty && sensor::Valve) {
 				buffer = state;
 			}
 			return buffer;
 		};
 };
 
-//Timer<unsigned short int, flags::wdtcsr::wdif> timer(0xff);
 Timer<unsigned short int> timer(0xff);
 
 namespace wd {
-	callback* const callbacks[]{ &sensors::High, &sensors::Low, &sensors::Valve, &sensors::WaterLack, &pump, &timer, &buttons::Btn };
+	callback* const callbacks[]{ &sensor::High, &sensor::Low, &sensor::Valve, &sensor::WaterLack, &pump, &timer, &button::Btn };
 	constexpr unsigned char const count = (sizeof(callbacks) / sizeof(callbacks[0])) - 1;
 	unsigned char counter = 0;
 }
 
 enum class State : const unsigned char {
 	STANDBY,
+
 	PRE_WASH,
 	WASH,
 	POST_WASH,
+
 	PRE_FILL,
 	FILL,
+
 	POST_FILL_WASH,
 	DONE,
-	POST_FILL,
+
+	FINISHING,
 
 	AUTO_WASH,
 };
@@ -599,8 +527,8 @@ enum class delaysID : const unsigned char {
 	POST_WASH,
 	PRE_FILL,
 	POST_FILL_WASH,
-	POST_FILL,
-	WASH_TIMER,
+	FINISHING,
+	FAST_WASH_PERIOD,
 };
 
 namespace task {
@@ -616,25 +544,18 @@ namespace task {
 			State virtual inline constexpr task(void) = 0;
 
 			BtnState btn_state(void) {
-				const auto tmp = buttons::Btn.timer();
+				const auto tmp = button::Btn.timer();
 				if (tmp > delay::BTN_LONG_TIMER) {
 					return BtnState::LONG_PRESS;
 				}
-				else if (!buttons::Btn) {
+				else if (!button::Btn) {
 					if (tmp > delay::BTN_TIMER) {
 						return BtnState::PRESS;
 					}
-					else if (buttons::Btn.clicks() != 0) {
+					else if (button::Btn.clicks() != 0) {
 						return BtnState::CLICK;
 					}
 				}
-
-				/*else if (tmp > delay::BTN_TIMER) {
-					return BtnState::PRESS;
-				}
-				else if (!buttons::Btn && buttons::Btn.clicks() != 0) {
-					return BtnState::CLICK;
-				}*/
 				return BtnState::FREE;
 			}
 
@@ -644,16 +565,16 @@ namespace task {
 			void inline check_btn_state(void) {
 				if (ignore_lack_sensor && BtnState::CLICK == btn_state()) {
 					ignore_lack_sensor = false;
-					buttons::Btn.disable();
+					button::Btn.disable();
 				}
 			}
 			
 			static bool wLack(void) {
-				bool tmp = !sensors::WaterLack.value();
+				const bool tmp = !sensor::WaterLack.value();
 				if (tmp) {
 					interrupted = true;
 					if (!ignore_lack_sensor) {
-						state = State::POST_FILL;
+						state = State::FINISHING;
 					}
 				}
 				return tmp && !ignore_lack_sensor;
@@ -664,9 +585,7 @@ namespace task {
 
 			void inline __attribute__((always_inline)) operator()(void) {
 				for (; *this;) {
-					if (this->task() == State::STANDBY) {
-						sleep_mode();
-					}
+					sleep_mode();
 				}
 			}
 	};
@@ -681,7 +600,19 @@ namespace task {
 
 			static inline State state = State::FULL;
 
+			static void inline __attribute__((always_inline)) increment_skipped_autowashes(void) {
+				if (skipped_autowashes < (const unsigned char)simple_round((double)delay::AUTO_WASH_LIMIT / delay::WASH)) {
+					skipped_autowashes++;
+				}
+			}
+
+			static bool inline __attribute__((always_inline)) is_skipped_autowashes(void) {
+				return skipped_autowashes > 1;
+			}
+
 		protected:
+			static inline unsigned char skipped_autowashes = 1;
+ 
 			void inline check_btn_state(void) {
 				if (state != State::AUTO) {
 					Task::check_btn_state();
@@ -690,9 +621,9 @@ namespace task {
 
 			static bool wLack(void) {
 				if (state == State::AUTO) {
-					bool tmp = !sensors::WaterLack.value();
+					bool tmp = !sensor::WaterLack.value();
 					if (tmp) {
-						::state = ::State::POST_FILL;
+						::state = ::State::FINISHING;
 					}
 					return tmp;
 				}
@@ -705,14 +636,7 @@ namespace task {
 	class Stanby : public Task {
 		private:
 			unsigned char auto_wash_period_encounter;
-			/*enum BtnState : const unsigned char {
-				btn_free,
-				btn_click,
-				btn_long_press,
-			};
 
-			bool prev_btn;
-			unsigned short int timer_pos;*/
 		protected:
 			State virtual inline constexpr task(void) override {
 				return State::STANDBY;
@@ -722,91 +646,76 @@ namespace task {
 			Stanby(void) : auto_wash_period_encounter(0) {
 				pump.off();
 				memory();
-				pins::Valve::Clear();
+				pin::Valve::Clear();
 				memory();
-				pins::WashValve::Clear();
+				pin::WashValve::Clear();
 				ignore_lack_sensor = false;
-				//timer_pos = 0;
 				
-				buttons::Btn.reset();
+				button::Btn.reset();
 				memory();
-				buttons::Btn.enable();
+				button::Btn.enable();
 				WashTask::state = WashTask::State::FAST;
+				set_sleep_mode(SLEEP_MODE_STANDBY);
 			}
 
 			~Stanby(void) {
-				sensors::Valve.stats.freeze = true;
-
-				/*if (timer.isDone()) {
-					state = States::PRE_WASH;
-				}
-				else {
-					state = States::PRE_FILL;
-				}*/
-
+				sensor::Valve.stats.freeze = true;
 				state = State::PRE_WASH;
 
 				if (ignore_lack_sensor) {
-					buttons::Btn.reset();
+					button::Btn.reset();
 				}
 				else {
-					buttons::Btn.disable();
+					button::Btn.disable();
 				}
+				set_sleep_mode(SLEEP_MODE_IDLE);
 			}
 
 			operator bool(void) override {
-				Tank::State tmp = Tank::state();
-				bool lck = sensors::WaterLack.value();
+				const Tank::State tmp = Tank::state();
+				const bool lck = sensor::WaterLack.value();
 
-				switch (btn_state()) {
-					case BtnState::LONG_PRESS:
-						ignore_lack_sensor = true;
-						interrupted = true;
-					case BtnState::PRESS:
-						if (!lck && !sensors::WaterLack.val_in_sync()) {
-							sensors::WaterLack.timer(0);
-						}
-					case BtnState::CLICK:
-						if (tmp != Tank::State::Empty && tmp != Tank::State::Full) {
-							interrupted = true;
-						}
-						pump.state(pump.Ready);
+				if (tmp != Tank::State::Full) {
+					switch (btn_state()) {
+						case BtnState::LONG_PRESS:
+							ignore_lack_sensor = true;
+						case BtnState::PRESS:
+							if (!lck && !sensor::WaterLack.val_in_sync()) {
+								sensor::WaterLack.timer(0);
+							}
+						case BtnState::CLICK:
+							if (tmp != Tank::State::Empty) {
+								interrupted = true;
+							}
+							pump.state(pump.Ready);
+					}
 				}
-
-				/*return !((tmp == Tank::Empty ||
-					(tmp != Tank::Full && interrupted)) &&
-					sensors::WaterLack.value() && pump.state() == pump.Ready);*/
-
-				/*if (timer.isDone()) {
-					if (auto_wash_period_encounter < 6) {
-						WashTask::state = WashTask::State::FULL;
-						auto_wash_period_encounter++;
-						timer.timer(delay::WASH_TIMER);
-					}
-					else if (sensors::WaterLack.value()) {
-						WashTask::state = WashTask::State::AUTO;
-						return false;
-					}
-				}*/
 				
-				bool auto_wash = false;
+				bool auto_wash = WashTask::is_skipped_autowashes();
 				if (timer.isDone()) {
-					if (auto_wash_period_encounter < (const unsigned char) simple_round((double)delay::AUTO_WASH_PERIOD / delay::WASH_TIMER)) {
+					if (auto_wash_period_encounter < (const unsigned char) simple_round((double)delay::AUTO_WASH_PERIOD / delay::FAST_WASH_PERIOD)) {
 						WashTask::state = WashTask::State::FULL;
 						auto_wash_period_encounter++;
-						timer.timer(delay::WASH_TIMER);
+						timer.timer(delay::FAST_WASH_PERIOD);
 					}
-					else if (lck) {
+					else {
 						auto_wash = true;
+						if (!lck) {
+							WashTask::increment_skipped_autowashes();
+							auto_wash_period_encounter = 0;
+							timer.timer(delay::FAST_WASH_PERIOD);
+						}
 					}
 				}
+
+				memory();
 
 				if (((tmp == Tank::State::Empty ||
 					(tmp != Tank::State::Full && interrupted)) &&
 					(lck || ignore_lack_sensor) && pump.state() == pump.Ready)) {
 					return false;
 				}
-				else if (auto_wash) {
+				else if (auto_wash && lck) {
 					WashTask::state = WashTask::State::AUTO;
 					return false;
 				}
@@ -814,7 +723,7 @@ namespace task {
 
 				/*return !((tmp == Tank::State::Empty ||
 					(tmp != Tank::State::Full && interrupted)) &&
-					(sensors::WaterLack.value() || ignore_lack_sensor) && pump.state() == pump.Ready);*/
+					(sensor::WaterLack.value() || ignore_lack_sensor) && pump.state() == pump.Ready);*/
 			}
 	};
 
@@ -827,15 +736,15 @@ namespace task {
 		public:
 			PreWash(void) {
 				//pump.off();
-				pins::WashValve::Set();
+				pin::WashValve::Set();
 				memory();
-				pins::Valve::Set();
-				//pins::WashValve::Clear();
+				pin::Valve::Set();
+				//pin::WashValve::Clear();
 			}
 
 			/*~PreWash(void) {
-				if (state == POST_FILL) {
-					pins::WashValve::Clear();
+				if (state == FINISHING) {
+					pin::WashValve::Clear();
 				}
 			}*/
 
@@ -848,7 +757,7 @@ namespace task {
 					}
 				}
 				else */if (wLack()) {
-					//pins::WashValve::Clear();
+					//pin::WashValve::Clear();
 					return false;
 				}
 				else if (timer((const unsigned char)delaysID::PRE_WASH, delay::PRE_WASH)) {
@@ -868,13 +777,13 @@ namespace task {
 
 		public:
 			Wash(void) {
-				//pins::Valve::Set();
-				//pins::WashValve::Set();
-				pins::Pump::Set();
+				//pin::Valve::Set();
+				//pin::WashValve::Set();
+				pin::Pump::Set();
 			}
 
 			//~Wash(void) {
-			//	//pins::WashValve::Clear();
+			//	//pin::WashValve::Clear();
 			//	if (state == POST_WASH) {
 			//		
 			//	}
@@ -895,9 +804,10 @@ namespace task {
 					pump.off();
 					return false;
 				}
-				else if (timer((const unsigned char)delaysID::WASH, state == State::FAST ? delay::FAST_WASH : delay::WASH)) {
+				else if (timer((const unsigned char)delaysID::WASH, state == State::FAST ? delay::FAST_WASH : ((delay::WASH - 1) * skipped_autowashes) + 1)) {
 					::state = ::State::POST_WASH;
-					pins::Pump::Clear();
+					skipped_autowashes = 1;
+					pin::Pump::Clear();
 					return false;
 				}
 
@@ -913,8 +823,8 @@ namespace task {
 
 		public:
 			~PostWash(void) {
-				//pins::WashValve::Clear();
-				pins::WashValve::Clear();
+				//pin::WashValve::Clear();
+				pin::WashValve::Clear();
 			}
 
 			operator bool(void) override {
@@ -930,7 +840,7 @@ namespace task {
 				}
 				else if (timer((const unsigned char)delaysID::POST_WASH, delay::POST_WASH)) {
 					if (state == State::AUTO) {
-						::state = ::State::POST_FILL;
+						::state = ::State::FINISHING;
 					}
 					else {
 						::state = ::State::PRE_FILL;
@@ -950,7 +860,7 @@ namespace task {
 
 		public:
 			PreFill(void) {
-				pins::Valve::Set();
+				pin::Valve::Set();
 			}
 
 			//~PreFill(void) {
@@ -992,8 +902,8 @@ namespace task {
 				memory();
 				if (state == State::DONE) {
 					interrupted = false;
-					state = State::POST_FILL;
-					sensors::Valve.stats.freeze = false;
+					state = State::FINISHING;
+					sensor::Valve.stats.freeze = false;
 				}
 				else {
 					pump.atomic = false;
@@ -1016,7 +926,7 @@ namespace task {
 				}
 				else {
 					if (Tank::state() == Tank::State::Full) {
-						pins::WashValve::Set();
+						pin::WashValve::Set();
 						state = State::POST_FILL_WASH;
 					}
 					else if (wLack()) {
@@ -1027,36 +937,13 @@ namespace task {
 							exit(EXIT_SUCCESS);
 							return false;
 						}
-						else if (sensors::Valve.value()) {
+						else if (sensor::Valve.value()) {
 							pump.atomic_time = false;
 							memory();
 							pump.reset_timer();
 						}
 					}
 				}
-
-				/*if (state != States::POST_FILL_WASH && Tank::state() == Tank::States::Full) {
-					pins::WashValve::Set();
-					state = States::POST_FILL_WASH;
-				}
-				else if (state == States::POST_FILL_WASH && timer((const unsigned char)delaysID::POST_FILL_WASH, delay::POST_FILL_WASH)) {
-					state = States::DONE;
-					return false;
-				}
-				else if (wLack()) {
-					return false;
-				}
-				else {
-					if (pump.state() == pump.OverPumping) {
-						exit(EXIT_SUCCESS);
-						return false;
-					}
-					else if (sensors::Valve.value()) {
-						pump.atomic_time = false;
-						memory();
-						pump.reset_timer();
-					}
-				}*/
 				return true;
 			}
 	};
@@ -1069,7 +956,7 @@ namespace task {
 
 		public:
 			PostFillWash(void) {
-				pins::WashValve::Set();
+				pin::WashValve::Set();
 			}
 
 			~PostFillWash(void) {
@@ -1080,48 +967,46 @@ namespace task {
 				check_btn_state();
 
 				if (wLack() || timer((const unsigned char)delaysID::POST_FILL_WASH, delay::POST_FILL_WASH)) {
-					state = State::POST_FILL;
+					state = State::FINISHING;
 					return false;
 				}
 				return true;
 			}
 	};
 
-	class PostFill : public Task {
+	class Finishing : public Task {
 		protected:
 			State virtual inline constexpr task(void) override {
-				return State::POST_FILL;
+				return State::FINISHING;
 			}
 
 		public:
-			//PostFill(void) {
-			//	/*pins::Valve::Set();*/
-			//	pins::WashValve::Clear();
+			//Finishing(void) {
+			//	/*pin::Valve::Set();*/
+			//	pin::WashValve::Clear();
 			//}
 
-			~PostFill(void) {
-				pins::Valve::Clear();
+			~Finishing(void) {
+				pin::Valve::Clear();
 				memory();
-				pins::WashValve::Clear();
+				pin::WashValve::Clear();
 
 				if (!interrupted) {
-					sensors::Valve.stats_new_iteration();
+					sensor::Valve.stats_new_iteration();
 				}
 
 				state = State::STANDBY;
-				timer((const unsigned char)delaysID::WASH_TIMER, delay::WASH_TIMER);
+				timer((const unsigned char)delaysID::FAST_WASH_PERIOD, delay::FAST_WASH_PERIOD);
 			}
 
 			operator bool(void) override {
-				//check_btn_state();
-
-				return !timer((const unsigned char)delaysID::POST_FILL, delay::POST_FILLING);
+				return !timer((const unsigned char)delaysID::FINISHING, delay::FINISHING);
 			}
 		};
 }
 
 template<typename Port, unsigned char mask = 0xff>
-void inline hizPort(void) {
+void inline __attribute__((always_inline)) hizPort(void) {
 	memory();
 	Port::SetConfiguration(mask, Port::In);
 	memory();
@@ -1133,11 +1018,11 @@ void __attribute__((used, naked, section(".init1")))
 pre_init(void) {
 	MCUCR = 0x00;
 
-	pins::Valve::SetConfiguration(pins::Valve::Port::Out);
-	pins::Valve::Clear();
+	pin::Valve::SetConfiguration(pin::Valve::Port::Out);
+	pin::Valve::Clear();
 
-	pins::WashValve::SetConfiguration(pins::WashValve::Port::Out);
-	pins::WashValve::Clear();
+	pin::WashValve::SetConfiguration(pin::WashValve::Port::Out);
+	pin::WashValve::Clear();
 	memory();
 
 	#ifdef DEBUG
@@ -1165,7 +1050,9 @@ init(void) {
 	wdt_reset(); //asm("wdr");
 	memory();
 	WDTCSR |= bit(WDCE) | bit(WDE);
+	memory();
 	WDTCSR = bit(WDE) | bit(WDIE) | bit(WDP0) | bit(WDP1); //bit(WDP2);
+	memory();
 
 	// Enable pin change interrupt for button
 	PCICR = bit(PCIE0);
@@ -1183,15 +1070,15 @@ init(void) {
 	
 
 	sei();
-	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+	set_sleep_mode(SLEEP_MODE_STANDBY);
 }
 
 void __attribute__((used, naked, section(".fini0")))
 terminate(void) {
 	cli();
 	pump.off();
-	pins::Valve::Clear();
-	pins::WashValve::Clear();
+	pin::Valve::Clear();
+	pin::WashValve::Clear();
 	memory();
 	sleep_mode();
 }
@@ -1201,7 +1088,7 @@ int main(void) {
 	for (;;) {
 		#ifdef DEBUG
 			bitWrite(PORTB, PINB0, Tank::state() == Tank::Empty);
-			bitWrite(PORTD, PIND5, sensors::High.value() && sensors::Low.value());
+			bitWrite(PORTD, PIND5, sensor::High.value() && sensor::Low.value());
 		#endif // DEBUG
 
 		switch (state) {
@@ -1233,33 +1120,33 @@ int main(void) {
 			//	task::PostFillWash()();
 			//	break;
 
-			case State::POST_FILL:
-				task::PostFill()();
+			case State::FINISHING:
+				task::Finishing()();
 				break;
 		}
 	}
 }
 
 ISRf(INT0_vect) {
-	sensors::High.interruptCallback();
+	sensor::High.interruptCallback();
 }
 
 ISRf(INT1_vect) {
-	sensors::WaterLack.interruptCallback();
+	sensor::WaterLack.interruptCallback();
 }
 
 ISRf(INT2_vect) {
-	sensors::Valve.interruptCallback();
+	sensor::Valve.interruptCallback();
 	memory();
 	pump.atomic_time = false;
 }
 
 ISRf(INT3_vect) {
-	sensors::Low.interruptCallback();
+	sensor::Low.interruptCallback();
 }
 
 ISRf(PCINT0_vect) {
-	buttons::Btn.interruptCallback();
+	button::Btn.interruptCallback();
 }
 
 ISRf(WDT_vect) {
