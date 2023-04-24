@@ -46,7 +46,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|VisualGDB'">
     <ClCompile>
-      <AdditionalIncludeDirectories>E:\Projects\AVR\libs\Mcucpp\3rdparty\include;E:\Projects\AVR\libs\Mcucpp\mcucpp;E:\Projects\AVR\libs\Mcucpp\mcucpp\AVR;E:\Projects\AVR\libs\MyCustomLibs;%(ClCompile.AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\Projects\AVR\libs\Mcucpp\3rdparty\include;E:\Projects\AVR\libs\Mcucpp\mcucpp;E:\Projects\AVR\libs\Mcucpp\mcucpp\AVR;E:\Projects\AVR\libs\avr-libstdcpp\include;E:\Projects\AVR\libs\MyCustomLibs;%(ClCompile.AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG=1;RELEASE=1 -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -fno-gcse-lm -mrelax;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>O3</Optimization>
       <LinkTimeOptimization>true</LinkTimeOptimization>
@@ -56,7 +56,7 @@
       <OmitFramePointer>true</OmitFramePointer>
       <PositionIndependentCode>false</PositionIndependentCode>
       <InputLanguage>Cpp</InputLanguage>
-      <CPPLanguageStandard>CPP1Z</CPPLanguageStandard>
+      <CPPLanguageStandard>CPP2A</CPPLanguageStandard>
       <CharSign>Unsigned</CharSign>
       <ShortEnums>true</ShortEnums>
       <CLanguageStandard>C99</CLanguageStandard>
@@ -87,6 +87,15 @@
   </ItemGroup>
   <ItemGroup>
     <Xml Include="avr.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Buzzer.h" />
+    <ClInclude Include="sPWM.h" />
+    <ClInclude Include="delays.h" />
+    <ClInclude Include="Pins.h" />
+    <ClInclude Include="Pump.h" />
+    <ClInclude Include="reg.h" />
+    <ClInclude Include="Tank.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

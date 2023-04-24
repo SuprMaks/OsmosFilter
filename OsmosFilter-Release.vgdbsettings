@@ -26,6 +26,7 @@
     <ProjectFile>OsmosFilter.vcxproj</ProjectFile>
     <RemoteBuildEnvironment>
       <Records />
+      <EnvironmentSetupFiles />
     </RemoteBuildEnvironment>
     <ParallelJobCount>1</ParallelJobCount>
     <SuppressDirectoryChangeMessages>true</SuppressDirectoryChangeMessages>
@@ -78,8 +79,8 @@
   <UserDefinedVariables />
   <ImportedPropertySheets />
   <CodeSense>
-    <Enabled>Unknown</Enabled>
-    <CXXFLAGS>/std:c ++ latest</CXXFLAGS>
+    <Enabled>False</Enabled>
+    <CXXFLAGS>-g -std=c++17</CXXFLAGS>
     <ExtraSettings>
       <HideErrorsInSystemHeaders>true</HideErrorsInSystemHeaders>
       <SupportLightweightReferenceAnalysis>true</SupportLightweightReferenceAnalysis>
@@ -87,7 +88,7 @@
         <Mode>Enabled</Mode>
         <SearchInProjectDir>true</SearchInProjectDir>
         <SearchInSourceDirs>true</SearchInSourceDirs>
-        <SearchInIncludeSubdirs>true</SearchInIncludeSubdirs>
+        <SearchInIncludeSubdirs>false</SearchInIncludeSubdirs>
       </DiscoverySettings>
       <CheckForClangFormatFiles>true</CheckForClangFormatFiles>
       <FormattingEngine>SysprogsFormat</FormattingEngine>

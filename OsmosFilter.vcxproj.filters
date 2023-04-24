@@ -45,4 +45,27 @@
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Pins.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Pump.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Tank.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="sPWM.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="delays.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="reg.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Buzzer.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
