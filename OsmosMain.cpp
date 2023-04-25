@@ -278,9 +278,7 @@ enum class State : const uint8_t {
 
 	FINISHING,
 
-	AUTO_WASH,
-
-	POWER_OFF,
+	AUTO_WASH
 };
 
 static State state = State::STANDBY;
@@ -424,14 +422,6 @@ namespace task {
 
 			void operator()(void) {
 				for (; *this;) {
-					//bool st;
-					/*memory();
-					ATOMIC{
-						st = pump.sleep_ready() && buzzer.sleep_ready();
-					}
-					memory();*/
-
-
 					if (task() == State::STANDBY) {
 						memory();
 						ATOMIC{
@@ -453,15 +443,6 @@ namespace task {
 					ATOMIC{
 						clr_wtdg();
 					}
-
-
-					/*if (task() == State::STANDBY && st) {
-						set_sleep_mode(SLEEP_MODE_STANDBY);
-					}
-					else {
-						set_sleep_mode(SLEEP_MODE_IDLE);
-					}*/
-					//sleep_mode();
 				}
 			}
 	};
@@ -472,6 +453,9 @@ namespace task {
 	class WashTask : public Task {
 		public:
 			enum class State : const uint8_t {
+				//UNKNOWN,
+				SKIP,
+
 				AUTO,
 				FAST,
 				FULL
@@ -516,29 +500,6 @@ namespace task {
 			}
 	};
 
-	class PowerOff : public Task {
-		protected:
-			State virtual inline constexpr task(void) override {
-				return State::POWER_OFF;
-			}
-
-		public:
-			PowerOff(void) {
-
-			}
-
-			~PowerOff(void) {
-				state = State::STANDBY;
-			}
-
-			operator bool(void) override {
-				/*if (btn_state() == BtnState::PRESS) {
-					return false;
-				}*/
-				return true;
-			}
-	};
-
 	class Stanby : public Task {
 		private:
 			uint8_t auto_wash_period_encounter;
@@ -555,12 +516,12 @@ namespace task {
 		public:
 			Stanby(void) : auto_wash_period_encounter(0u) {
 				//uart((unsigned short int)0xCCCCu);
-				pump.off();
-				memory();
-				pin::Valve::Clear();
+				/*pump.off();
+				memory();*/
+				/*pin::Valve::Clear();
 				memory();
 				pin::WashValve::Clear();
-				memory();
+				memory();*/
 				#ifdef BUTTON
 				pwr_dwn = false;
 				ignore_lack_sensor = false;
@@ -568,15 +529,13 @@ namespace task {
 				memory();
 				button::Btn.enable();
 				#endif // BUTTON
-				WashTask::state = WashTask::State::FAST;
-				//set_sleep_mode(SLEEP_MODE_STANDBY);
+				WashTask::state = WashTask::State::SKIP;
 			}
 
 			~Stanby(void) {
 				//uart((unsigned short int)0xDDDDu);
 				sensor::Valve.stats.freeze = true;
-				state = State::PRE_WASH;
-
+				state = WashTask::state == WashTask::State::SKIP ? State::PRE_FILL : State::PRE_WASH;
 
 				#ifdef BUTTON
 				if (ignore_lack_sensor) {
@@ -586,7 +545,6 @@ namespace task {
 					button::Btn.disable();
 				}
 				#endif // BUTTON
-				//set_sleep_mode(SLEEP_MODE_IDLE);
 			}
 
 			operator bool(void) override {
@@ -631,7 +589,7 @@ namespace task {
 				memory();
 				if (timer.isDone()) {
 					if (auto_wash_period_encounter < (const uint8_t) simple_round((double)delay::AUTO_WASH_PERIOD / delay::FAST_WASH_PERIOD)) {
-						WashTask::state = WashTask::State::FULL;
+						WashTask::state = (WashTask::state == WashTask::State::SKIP) ? WashTask::State::FAST : WashTask::State::FULL;
 						auto_wash_period_encounter++;
 						timer.timer(delay::FAST_WASH_PERIOD);
 					}
@@ -680,14 +638,10 @@ namespace task {
 				}
 				#endif // BUTTON
 				return true;
-
-				/*return !((tmp == Tank::State::Empty ||
-					(tmp != Tank::State::Full && interrupted)) &&
-					(sensor::WaterLack.value() || ignore_lack_sensor) && pump.state() == pump.Ready);*/
 			}
 	};
 
-	class PreWash : public WashTask {
+	/*class PreWash : public WashTask {
 		protected:
 			::State virtual inline constexpr task(void) override {
 				return ::State::PRE_WASH;
@@ -695,20 +649,10 @@ namespace task {
 
 		public:
 			PreWash(void) {
-				//pump.off();
 				pin::WashValve::Set();
 				memory();
 				pin::Valve::Set();
-				//pin::WashValve::Clear();
-				//pin::uart_tx::Set();
 			}
-
-			//~PreWash(void) {
-				//pin::uart_tx::Clear();
-				/*if (state == FINISHING) {
-					pin::WashValve::Clear();
-				}*/
-			//}
 
 			operator bool(void) override {
 				#ifdef BUTTON
@@ -716,13 +660,7 @@ namespace task {
 				memory();
 				#endif // BUTTON
 
-				/*if (state == State::AUTO) {
-					if (_wLack()) {
-						return false;
-					}
-				}
-				else */if (wLack()) {
-					//pin::WashValve::Clear();
+				if (wLack()) {
 					return false;
 				}
 				else if (timer((uint8_t)delaysID::PRE_WASH, delay::PRE_WASH)) {
@@ -732,7 +670,7 @@ namespace task {
 
 				return true;
 			}
-	};
+	};*/
 
 	class Wash : public WashTask {
 		protected:
@@ -742,50 +680,63 @@ namespace task {
 
 		public:
 			Wash(void) {
-				//pin::Valve::Set();
-				//pin::WashValve::Set();
-				//pin::Pump::Set();
-				//memory();
-				pump.force_on();
+				pin::WashValve::Set();
+				memory();
+				pin::Valve::Set();
 			}
 
-			//~Wash(void) {
-			//	//pin::WashValve::Clear();
-			//	if (state == POST_WASH) {
-			//		
-			//	}
-			//	
-
-			//}
+			~Wash(void) {
+				pin::WashValve::Clear();
+			}
 
 			operator bool(void) override {
 				#ifdef BUTTON
 				check_btn_state();
 				memory();
 				#endif // BUTTON
-				/*if (state == State::AUTO) {
-					if (_wLack()) {
-						pump.off();
-						return false;
-					}
-				}
-				else*/ if (wLack()) {
+
+				if (wLack()) {
 					pump.off();
 					return false;
 				}
-				else if (timer((uint8_t)delaysID::WASH, state == State::FAST ? delay::FAST_WASH : ((delay::WASH - 1u) * skipped_autowashes) + 1u)) {
-					::state = ::State::POST_WASH;
-					skipped_autowashes = 1u;
-					//pin::Pump::Clear();
-					pump.force_off();
-					return false;
-				}
+				else {
+					switch (::state) {
+						case ::State::PRE_WASH:
+							if (timer((uint8_t)delaysID::PRE_WASH, delay::PRE_WASH)) {
+								::state = ::State::WASH;
+								pump.force_on();
+							}
+							break;
 
+						case ::State::WASH:
+							if (timer((uint8_t)delaysID::WASH, state == State::FAST ? delay::FAST_WASH : ((delay::WASH - 1u) * skipped_autowashes) + 1u)) {
+								::state = ::State::POST_WASH;
+								skipped_autowashes = 1u;
+								//pin::Pump::Clear();
+								pump.force_off();
+								//return false;
+							}
+							break;
+
+						case ::State::POST_WASH:
+							if (timer((const uint8_t)delaysID::POST_WASH, delay::POST_WASH)) {
+								if (state == State::AUTO) {
+									::state = ::State::FINISHING;
+								}
+								else {
+									::state = ::State::PRE_FILL;
+								}
+								return false;
+							}
+							break;
+					}
+				}
+				
 				return true;
 			}
 	};
 
-	class PostWash : public WashTask {
+	/*class PostWash : public WashTask {
 		protected:
 			::State virtual inline constexpr task(void) override {
 				return ::State::POST_WASH;
@@ -801,12 +752,7 @@ namespace task {
 				check_btn_state();
 				memory();
 				#endif // BUTTON
-				/*if (state == State::AUTO) {
-					if (_wLack()) {
-						return false;
-					}
-				}
-				else*/ if (wLack()) {
+				if (wLack()) {
 					return false;
 				}
 				else if (timer((const uint8_t)delaysID::POST_WASH, delay::POST_WASH)) {
@@ -821,7 +767,7 @@ namespace task {
 
 				return true;
 			}
-	};
+	};*/
 
 	class PreFill : public Task {
 		protected:
@@ -1131,15 +1077,12 @@ int main(void) {
 		#endif // DEBUG
 		
 		switch (state) {
-			/*case State::POWER_OFF:
-				task::PowerOff()();
-				break;*/
 
 			case State::STANDBY:
 				task::Stanby()();
 				break;
 
-			case State::PRE_WASH:
+			/*case State::PRE_WASH:
 				task::PreWash()();
 				break;
 
@@ -1149,6 +1092,11 @@ int main(void) {
 
 			case State::POST_WASH:
 				task::PostWash()();
+				break;*/
+			case State::PRE_WASH:
+			case State::WASH:
+			case State::POST_WASH:
+				task::Wash()();
 				break;
 
 			case State::PRE_FILL:
@@ -1158,10 +1106,6 @@ int main(void) {
 			case State::FILL:
 				task::Fill()();
 				break;
-
-			//case States::POST_FILL_WASH:
-			//	task::PostFillWash()();
-			//	break;
 
 			case State::FINISHING:
 				task::Finishing()();

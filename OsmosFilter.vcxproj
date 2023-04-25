@@ -90,7 +90,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Buzzer.h" />
-    <ClInclude Include="sPWM.h" />
     <ClInclude Include="delays.h" />
     <ClInclude Include="Pins.h" />
     <ClInclude Include="Pump.h" />

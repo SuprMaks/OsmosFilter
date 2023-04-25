@@ -55,9 +55,6 @@
     <ClInclude Include="Tank.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="sPWM.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="delays.h">
       <Filter>Header files</Filter>
     </ClInclude>

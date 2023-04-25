@@ -257,12 +257,6 @@ class PumpSoft : public Pump<Pin> {
 					TCCR0B = bit(WGM02) | (div & 0b111u);
 				}
 
-				/*static void inline start_atom(void) {
-					ATOMIC{
-						start();
-					}
-				}*/
-
 				static void inline __attribute__((always_inline)) stop(void) {
 					bitmask_Clear(TCCR0B, 0b111u);
 				}
@@ -438,18 +432,6 @@ class PumpSoft : public Pump<Pin> {
 			TCCR4B = 0u;
 		}
 
-		/*static inline void start_atom(void) {
-			ATOMIC{
-				start();
-			}
-		}
-
-		static inline void stop_atom(void) {
-			ATOMIC{
-				stop();
-			}
-		}*/
-
 		static void inline top(uint16_t max) {
 			TC4H = highByte(max);
 			memory();
@@ -485,7 +467,6 @@ class PumpSoft : public Pump<Pin> {
 					const auto ret = tmp_pwm + val;
 					compr(ret);
 					memory();
-					//Pin::Clear();
 					start();
 					memory();
 					return ret;
@@ -509,7 +490,6 @@ class PumpSoft : public Pump<Pin> {
 					const auto ret = tmp_pwm + val;
 					compr(ret);
 					memory();
-					//Pin::Clear();
 					start();
 					memory();
 					return ret;
