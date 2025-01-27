@@ -35,7 +35,7 @@ namespace delay {
 
 		namespace lack {
 			constexpr auto on = sec_conv(2u);
-			constexpr auto off = sec_conv(4u);
+			constexpr auto off = sec_conv(8u);
 
 			constexpr auto without_water = sec_conv(20u * 60u);
 			constexpr auto waiting_water = sec_conv(60u * 60u);
@@ -53,7 +53,7 @@ namespace delay {
 	constexpr auto POST_WASH = sec_conv(4u);
 
 	constexpr auto PRE_FILLING = sec_conv(4u);
-	constexpr auto FINISHING = sec_conv(4u);
+	constexpr auto FINISH = sec_conv(4u);
 
 	constexpr auto MAX_PUMPING = sec_conv(3u * 60u * 60u);
 

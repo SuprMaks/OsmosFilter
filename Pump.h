@@ -87,23 +87,27 @@ class Pump : public Timer<uint16_t> {
 		}
 
 		TimerDT pump_time(void) {
-			TimerDT tmp = delay::MAX_PUMPING;
-			if (stat() != 0) {
+			TimerDT tmp = stat();
+			if (tmp == 0u || tmp >= (delay::MAX_PUMPING / 2u)) {
+				tmp = delay::MAX_PUMPING;
+			}
+			else {
 				//tmp = (TimerDT)simple_round((double)stat() * 1.3);
+				tmp *= 2u;
 
 				// a / b == a * (1 / b) == (a * x) >> n
 				// x = (2^n) / b + 1
-				constexpr uint8_t k = 3u;
+				//constexpr uint8_t k = 3u;
 				// x: 2^n < (MAX / a_max - 1) * b
 				// https://alexgyver.ru/lessons/code-optimisation/
 				//constexpr uint32_t n2 = (ULONG_MAX / (delay::MAX_PUMPING + 3000u) - 1u) * k;
-				constexpr uint8_t n = 17u;
-				constexpr uint16_t x = (1ul << n) / k + 1u;
+				//constexpr uint8_t n = 17u;
+				//constexpr uint16_t x = (1ul << n) / k + 1u;
 
-				tmp = stat() + (((uint32_t)stat() * x) >> n);
-				if (tmp > delay::MAX_PUMPING) {
+				//tmp = stat() + (((uint32_t)stat() * x) >> n);
+				/*if (tmp > delay::MAX_PUMPING) {
 					tmp = delay::MAX_PUMPING;
-				}
+				}*/
 			}
 			return tmp;
 		}
@@ -142,22 +146,40 @@ class Pump : public Timer<uint16_t> {
 			memory();
 		}
 
+		void inline incr_delay_reset(void) {
+			ATOMIC{
+				_incr_delay = delay::threshold::lack::try_water;
+			}
+		}
+
 		inline __attribute__((always_inline)) Pump(void) : base(), _state(State::Ready), _incr_delay(delay::threshold::lack::try_water), atomic_time(true), atomic(true) {
 			Pin::SetConfiguration(Pin::Port::Out);
 			Pin::Clear();
 		}
 
-		void virtual inline __attribute__((always_inline)) force_on(void) {
+	protected:
+		void virtual inline __attribute__((always_inline)) _force_on(void) {
 			Pin::Set();
 		}
 
-		void virtual inline __attribute__((always_inline)) force_off(void) {
+		void virtual inline __attribute__((always_inline)) _force_off(void) {
 			Pin::Clear();
+		}
+
+	public:
+		// Same as _force_on with check current state
+		void virtual inline __attribute__((always_inline)) force_on(void) {
+			_force_on();
+		}
+
+		// Same as _force_off with check current state
+		void virtual inline __attribute__((always_inline)) force_off(void) {
+			_force_off();
 		}
 
 		void on(void) {
 			if (!raw_state()) {
-				force_on();
+				_force_on();
 				memory();
 				state(State::Working);
 				memory();
@@ -167,7 +189,7 @@ class Pump : public Timer<uint16_t> {
 
 		void off(void) {
 			if (raw_state()) {
-				force_off();
+				_force_off();
 				memory();
 				state(State::Cooldown);
 				memory();
@@ -616,29 +638,52 @@ class PumpSoft : public Pump<Pin> {
 			timer::init();
 		}
 
-		void inline __attribute__((always_inline)) emergency_off(void) {
-			timer::off_atom();
-			memory();
-			stop();
-			memory();
-			Pin::Clear();
-			_off_atom();
-		}
-
 		bool static inline sleep_ready(void) {
 			return !pll_state() && timer::is_running();
 		}
 
-		void inline force_on(void) override {
-			k = start_k;
+		void inline __attribute__((always_inline)) emergency_off(void) {
+			/*timer::off_atom();
+			memory();
+			stop();
+			memory();
+			_off_atom();
+			memory();
+			Pin::Clear();*/
+
+			force_off();
+			while(!sleep_ready());
+		}
+
+	private:
+		void inline _sw(int8_t seq_k) {
+			k = seq_k;
 			memory();
 			start_sequence();
 		}
 
-		void inline force_off(void) override {
-			k = stop_k;
-			memory();
-			start_sequence();
+		void inline sw(int8_t seq_k) {
+			if (k != seq_k) {
+				_sw(seq_k);
+			}
+		}
+
+	protected:
+		void inline __attribute__((always_inline)) _force_on(void) override {
+			_sw(start_k);
+		}
+
+		void inline __attribute__((always_inline)) _force_off(void) override {
+			_sw(stop_k);
+		}
+
+	public:
+		void inline __attribute__((always_inline)) force_on(void) override {
+			sw(start_k);
+		}
+
+		void inline __attribute__((always_inline)) force_off(void) override {
+			sw(stop_k);
 		}
 };
 

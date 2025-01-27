@@ -9,16 +9,12 @@
 <!-- In order to build this project manually (outside VisualGDB), please provide TOOLCHAIN_ROOT, BSP_ROOT, EFP_BASE and TESTFW_BASE variables via Environment or Make command line -->
 	<ItemDefinitionGroup>
 		<ClCompile>
+			<AdditionalOptions>-mmcu=atmega32u4 %(ClCompile.AdditionalOptions)</AdditionalOptions>
 		</ClCompile>
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup>
 		<Link>
+			<AdditionalOptions>-mmcu=atmega32u4 %(Link.AdditionalOptions)</AdditionalOptions>
 		</Link>
-	</ItemDefinitionGroup>
-
-	<ItemDefinitionGroup>
-		<ToolchainSettingsContainer>
-			<DeviceType  Condition="'%(ToolchainSettingsContainer.DeviceType)' == ''">atmega32u4</DeviceType>
-		</ToolchainSettingsContainer>
 	</ItemDefinitionGroup>
 </Project>

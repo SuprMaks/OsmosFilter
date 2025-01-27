@@ -34,20 +34,20 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|VisualGDB'">
     <GNUConfigurationType>Debug</GNUConfigurationType>
-    <ToolchainID>d63903af-7af9-4be7-ad99-d371ba7d7b7a</ToolchainID>
-    <ToolchainVersion>11.1.0/10.2/r0</ToolchainVersion>
+    <ToolchainID>6ce99c70-7f5e-44ff-98e9-a141c128cce7</ToolchainID>
+    <ToolchainVersion>12.1.0/12.1/r0</ToolchainVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|VisualGDB'">
-    <ToolchainID>d63903af-7af9-4be7-ad99-d371ba7d7b7a</ToolchainID>
-    <ToolchainVersion>11.1.0/10.2/r0</ToolchainVersion>
+    <ToolchainID>6ce99c70-7f5e-44ff-98e9-a141c128cce7</ToolchainID>
     <TargetExt>.elf</TargetExt>
     <ExtensionsToDeleteOnClean>*.elf;*.lss;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
     <GenerateBuildScript>false</GenerateBuildScript>
+    <ToolchainVersion>12.1.0/12.1/r0</ToolchainVersion>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|VisualGDB'">
     <ClCompile>
       <AdditionalIncludeDirectories>E:\Projects\AVR\libs\Mcucpp\3rdparty\include;E:\Projects\AVR\libs\Mcucpp\mcucpp;E:\Projects\AVR\libs\Mcucpp\mcucpp\AVR;E:\Projects\AVR\libs\avr-libstdcpp\include;E:\Projects\AVR\libs\MyCustomLibs;%(ClCompile.AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG=1;RELEASE=1 -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -fno-gcse-lm -mrelax;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG=1;RELEASE=1 -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -fno-gcse-lm -mrelax -Wno-deprecated;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>O3</Optimization>
       <LinkTimeOptimization>true</LinkTimeOptimization>
       <InlineFunctions>true</InlineFunctions>
@@ -55,13 +55,13 @@
       <DebugInformationFormat>-g0 -ggdb0</DebugInformationFormat>
       <OmitFramePointer>true</OmitFramePointer>
       <PositionIndependentCode>false</PositionIndependentCode>
-      <InputLanguage>Cpp</InputLanguage>
       <CPPLanguageStandard>CPP2A</CPPLanguageStandard>
       <CharSign>Unsigned</CharSign>
       <ShortEnums>true</ShortEnums>
-      <CLanguageStandard>C99</CLanguageStandard>
+      <CLanguageStandard>C2x</CLanguageStandard>
       <DeleteNullPointerChecks>true</DeleteNullPointerChecks>
       <ConserveStack>false</ConserveStack>
+      <AdditionalOptions>/Zc:__cplusplus /std:c++20 -x c++ %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalLinkerInputs>;%(Link.AdditionalLinkerInputs)</AdditionalLinkerInputs>
