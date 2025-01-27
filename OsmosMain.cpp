@@ -518,10 +518,14 @@ namespace task {
 				//uart((unsigned short int)0xCCCCu);
 				/*pump.off();
 				memory();*/
-				/*pin::Valve::Clear();
+				
+				// Already should be closed, but just in case
+				// TODO: Check also just in case pump state and maybe terminate program at all
+				pin::Valve::Clear();
 				memory();
 				pin::WashValve::Clear();
-				memory();*/
+				memory();
+
 				#ifdef BUTTON
 				pwr_dwn = false;
 				ignore_lack_sensor = false;
@@ -914,10 +918,10 @@ namespace task {
 			}
 
 			~Finishing(void) {
-				/*pin::Valve::Clear();
+				pin::Valve::Clear();
 				memory();
 				pin::WashValve::Clear();
-				memory();*/
+				memory();
 
 				if (!interrupted) {
 					sensor::Valve.stats_new_iteration();
